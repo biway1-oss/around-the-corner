@@ -261,7 +261,7 @@ document.getElementById('jobForm').addEventListener('submit',function(e){e.preve
 <form id="ddJobForm" class="dd-grid">
 <div><label for="ddTitle">Job title</label><input id="ddTitle" maxlength="80" required placeholder="e.g. Paint a bedroom"></div>
 <div><label for="ddCategory">Category</label><select id="ddCategory"><option>Home Improvements</option><option>Lawn & Garden</option><option>Cleaning</option><option>Small Car Repairs</option><option>Other</option></select></div>
-<div><label for="ddTown">Town</label><select id="ddTown"><option>Amherstburg</option><option>Windsor</option><option>Leamington</option><option>Kingsville</option><option>Other area</option></select><button class="btn" type="submit">Post sample job</button></div>
+<div><label for="ddTown">Town</label><select id="ddTown"><option>Amherstburg</option><option>Windsor</option><option>Leamington</option><option>Kingsville</option><option>Other area</option></select></div><div class="dd-photo-field"><label for="ddPhotos">Job photos (optional, up to 10)</label><input id="ddPhotos" type="file" accept="image/*" multiple><p class="dd-small">Photos stay in this browser for this private demo. Avoid personal or sensitive photos.</p><div id="ddPhotoPreview" class="dd-photo-grid"></div></div><div><button class="btn" type="submit">Post sample job</button></div>
 </form>
 <h3>Your sample jobs</h3><div id="ddCustomerJobs" class="dd-grid"></div>
 </div>
@@ -274,11 +274,16 @@ document.getElementById('jobForm').addEventListener('submit',function(e){e.preve
 <script>
 (()=>{
 const KEY='atc-dual-dash-v3', $=id=>document.getElementById(id);
+let pendingPhotos=[];
+const photoStyle=document.createElement('style');photoStyle.textContent='.dd-photo-field{grid-column:1/-1}.dd-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:10px;margin:10px 0}.dd-photo-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;border:1px solid #dce9e2}.dd-photo-grid button{font-size:12px;padding:5px;margin-top:4px}.dd-photo-grid figure{margin:0}.dd-photo-grid figcaption{font-size:12px;overflow-wrap:anywhere}.dd-photo-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin:12px 0}.dd-photo-view img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;cursor:zoom-in}.dd-photo-view a{display:block}';document.head.append(photoStyle);
+function photoPreview(){const root=$('ddPhotoPreview');root.replaceChildren();pendingPhotos.forEach((photo,index)=>{const f=document.createElement('figure'),img=document.createElement('img');img.src=photo.data;img.alt='Selected job photo '+(index+1);f.append(img);const b=document.createElement('button');b.type='button';b.className='btn secondary';b.textContent='Remove';b.addEventListener('click',()=>{pendingPhotos.splice(index,1);photoPreview()});f.append(b);root.append(f)})}
+function shrinkPhoto(file){return new Promise((resolve,reject)=>{const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{try{const scale=Math.min(1,850/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve({data:c.toDataURL('image/jpeg',.65),name:file.name})}catch(e){reject(e)}finally{URL.revokeObjectURL(url)}};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Could not read photo'))};img.src=url})}
+$('ddPhotos').addEventListener('change',async e=>{const files=Array.from(e.target.files);if(files.length+pendingPhotos.length>10){tell('Maximum 10 photos per job.');e.target.value='';return}for(const file of files){if(!file.type.startsWith('image/')||file.size>12*1024*1024){tell('Please choose image files under 12 MB each.');continue}try{pendingPhotos.push(await shrinkPhoto(file))}catch(err){tell('One photo could not be loaded.')}}e.target.value='';photoPreview()});
 const seed=()=>({jobs:[{id:1,title:'Replace bathroom vanity',category:'Home Improvements',town:'Amherstburg',status:'open',bid:null,appointment:null,messages:[],review:null}],nextId:2});
 let data;try{data=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!data||!Array.isArray(data.jobs)||typeof data.nextId!=='number')data=seed();
 let role='customer';
-const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(data))}catch(e){}};
+const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(data));return true}catch(e){tell('Browser storage is full. Try fewer or smaller photos. Job was not saved.');return false}};
 const element=(tag,content,cls)=>{const n=document.createElement(tag);if(content!==undefined)n.textContent=content;if(cls)n.className=cls;return n};
 const action=(parent,label,fn)=>{const b=element('button',label,'btn secondary');b.type='button';b.addEventListener('click',fn);parent.append(b);return b};
 const line=(parent,label,cls)=>parent.append(element('p',label,cls));
@@ -287,6 +292,7 @@ function switchRole(r){role=r;$('ddCustomerView').hidden=r!=='customer';$('ddPro
 function card(job,side){
  const n=element('article',undefined,'dd-card');n.append(element('div',job.status.replaceAll('_',' '),'dd-status'),element('h3',job.title));
  line(n,job.category+' · '+job.town,'dd-small');
+ if(Array.isArray(job.photos)&&job.photos.length){const gallery=element('div',undefined,'dd-photo-view');job.photos.forEach((photo,index)=>{if(!photo||typeof photo.data!=='string'||!photo.data.startsWith('data:image/'))return;const a=document.createElement('a');a.href=photo.data;a.target='_blank';a.rel='noopener';a.title='Open full photo';const img=document.createElement('img');img.src=photo.data;img.alt='Job photo '+(index+1);img.loading='lazy';a.append(img);gallery.append(a)});n.append(gallery)}
  if(job.bid)line(n,'Quote: $'+job.bid.amount+' CAD');
  if(job.appointment)line(n,'Appointment: '+new Date(job.appointment+'T12:00:00').toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'})+' at '+job.time);
  if(side==='provider'&&job.status==='open'){
@@ -326,7 +332,7 @@ function render(){
 $('ddCustomer').addEventListener('click',()=>switchRole('customer'));
 $('ddProvider').addEventListener('click',()=>switchRole('provider'));
 $('ddReset').addEventListener('click',()=>{data=seed();persist();tell('Sample jobs reset.');render()});
-$('ddJobForm').addEventListener('submit',e=>{e.preventDefault();const title=$('ddTitle').value.trim();if(!title)return;data.jobs.push({id:data.nextId++,title,category:$('ddCategory').value,town:$('ddTown').value,status:'open',bid:null,appointment:null,messages:[],review:null});persist();$('ddJobForm').reset();tell('Sample job posted. Switch to Provider to place a bid.');render()});
+$('ddJobForm').addEventListener('submit',e=>{e.preventDefault();const title=$('ddTitle').value.trim();if(!title)return;data.jobs.push({id:data.nextId++,title,category:$('ddCategory').value,town:$('ddTown').value,status:'open',bid:null,appointment:null,messages:[],review:null,photos:pendingPhotos.slice()});if(!persist()){data.jobs.pop();data.nextId--;return;}$('ddJobForm').reset();pendingPhotos=[];photoPreview();tell('Sample job posted. Switch to Provider to place a bid.');render()});
 render();
 })();
 </script>
