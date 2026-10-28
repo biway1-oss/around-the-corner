@@ -145,10 +145,10 @@ $('atcSignIn').addEventListener('click',()=>auth('signin'));
 $('dashboardSignOut').addEventListener('click',()=> $('atcSignOut').click());
 $('atcSignOut').addEventListener('click',async()=>{const {error}=await supabase.auth.signOut();if(error)status(error.message);else updateUser(null);});
 </script>
-<main>
+<main><div class="atc-launch-note"><strong>Private preview:</strong> Explore the site and test job posting. Online photo storage, real provider messaging, payments, and verified reviews are not enabled yet.</div>
 <section class="container" id="services"><h2>What do you need help with?</h2><p class="muted">Browse popular local services.</p><div class="grid"><div class="tile"><span>🌱</span>Lawn Care</div><div class="tile"><span>🔧</span>Plumbing</div><div class="tile"><span>🌳</span>Tree Services</div><div class="tile"><span>❄️</span>Snow Removal</div><div class="tile"><span>🚗</span>Small Car Repairs</div><div class="tile"><span>🧹</span>Cleaning</div><div class="tile"><span>🎨</span>Painting</div><div class="tile"><span>🛠️</span>Handyman Services</div></div></section>
-<section class="container" id="post"><h2>Post a Job</h2><p class="muted">Tell local service providers what you need.</p><div class="panel"><form id="jobForm"><label for="jobTitle">Job title</label><input id="jobTitle" required maxlength="100" placeholder="e.g. Cut my lawn"><label for="category">Category</label><select id="category" required><option value="">Choose a category</option><option>Lawn Care</option><option>Plumbing</option><option>Tree Services</option><option>Snow Removal</option><option>Small Car Repairs</option><option>Cleaning</option><option>Painting</option><option>Handyman Services</option><option>Other</option></select><label for="description">Describe the job</label><textarea id="description" required maxlength="2000" placeholder="What needs to be done?"></textarea><label for="area">Neighbourhood or town</label><input id="area" required maxlength="100" placeholder="e.g. Amherstburg"><details><summary style="margin-top:20px;cursor:pointer;font-weight:700">Advanced Details (optional)</summary><label for="dimensions">Measurements / dimensions</label><textarea id="dimensions" placeholder="Sizes, quantities, or other useful details"></textarea></details><div class="notice">Prototype mode: jobs are not yet sent to providers or saved online. Please don't enter sensitive personal information.</div><p><button class="btn" type="submit">Preview My Job</button></p><div id="result" role="status" aria-live="polite"></div></form></div></section>
-<section class="container" id="providers"><h2>Become a Local Service Provider</h2><p class="muted">Build your profile, show up to 10 portfolio photos, manage appointments, and connect with customers nearby.</p><div class="grid"><div class="tile"><span>📷</span>Show Your Work</div><div class="tile"><span>📅</span>Organize Your Schedule</div><div class="tile"><span>⭐</span>Earn Verified Reviews</div><div class="tile"><span>🤝</span>Find Local Jobs</div></div><p class="notice">Provider accounts, photo uploads, scheduling, and verified reviews are planned features, not active yet.</p></section>
+<section class="container" id="post"><h2>Post a Job</h2><p class="muted">Tell local service providers what you need.</p><div class="panel"><form id="jobForm"><label for="jobTitle">Job title</label><input id="jobTitle" required maxlength="100" placeholder="e.g. Cut my lawn"><label for="category">Category</label><select id="category" required><option value="">Choose a category</option><option>Lawn Care</option><option>Plumbing</option><option>Tree Services</option><option>Snow Removal</option><option>Small Car Repairs</option><option>Cleaning</option><option>Painting</option><option>Handyman Services</option><option>Other</option></select><label for="description">Describe the job</label><textarea id="description" required maxlength="2000" placeholder="What needs to be done?"></textarea><label for="jobPhotos">Job photos (up to 6)</label><input id="jobPhotos" type="file" accept="image/*" multiple><div id="jobPhotoPreview" class="atc-photo-preview" aria-live="polite"></div><p class="muted">Photos are previewed on this device only in this prototype; they are not uploaded.</p><label for="area">Neighbourhood or town</label><input id="area" required maxlength="100" placeholder="e.g. Amherstburg"><details><summary style="margin-top:20px;cursor:pointer;font-weight:700">Advanced Details (optional)</summary><label for="dimensions">Measurements / dimensions</label><textarea id="dimensions" placeholder="Sizes, quantities, or other useful details"></textarea></details><div class="notice">Prototype mode: this form previews a job only. No job or photo is uploaded or published. Please do not enter sensitive personal information.</div><p><button class="btn" type="submit">Preview My Job</button></p><div id="result" role="status" aria-live="polite"></div></form></div></section>
+<section class="container" id="providers"><h2>Become a Local Service Provider</h2><p class="muted">Build your profile, show up to 10 portfolio photos, manage appointments, and connect with customers nearby.</p><div class="grid"><div class="tile"><span>📷</span>Show Your Work</div><div class="tile"><span>📅</span>Organize Your Schedule</div><div class="tile"><span>⭐</span>Earn Verified Reviews</div><div class="tile"><span>🤝</span>Find Local Jobs</div></div><p class="notice">Provider portfolios, appointment booking, and verified reviews are design goals. They require secure database tables, permissions and testing before public launch.</p></section>
 </main><footer>© 2026 Around the Corner · Local connections, stronger communities.</footer>
 <script>
 document.getElementById('jobForm').addEventListener('submit',function(e){e.preventDefault();const title=document.getElementById('jobTitle').value.trim();const area=document.getElementById('area').value.trim();document.getElementById('result').textContent=`Preview ready: “${title}” in ${area}. Your job has not been published.`;});
@@ -168,173 +168,25 @@ document.getElementById('jobForm').addEventListener('submit',function(e){e.preve
  render();
 })();
 </script>
-
 <style>
-#workflowDemo{max-width:1100px;margin:24px auto;padding:0 20px}
-#workflowDemo .panel{max-width:none;margin:0}
-.atc-flow-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
-.atc-flow-card{border:1px solid #dce9e2;border-radius:12px;padding:16px;background:#fff}
-.atc-flow-card h4{margin:4px 0 8px}
-.atc-flow-card p{margin:7px 0}
-.atc-flow-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.atc-flow-actions button{padding:9px 12px}
-.atc-flow-note{font-size:13px;color:#587267}
-#workflowDemo [hidden]{display:none!important}
+.atc-photo-preview{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+.atc-photo-preview figure{margin:0;width:112px}
+.atc-photo-preview img{width:112px;height:90px;object-fit:cover;border-radius:10px;border:1px solid #dbe5e8}
+.atc-photo-preview figcaption{font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.atc-launch-note{background:#e9f4ef;border-left:4px solid #21845b;padding:12px 16px;border-radius:8px;margin:20px auto;max-width:1100px}
 </style>
-<section id="workflowDemo" aria-label="Marketplace workflow demonstration">
-<div class="panel">
-<p class="eyebrow" style="color:#16815f!important">Private development preview</p>
-<h2>Job-to-Booking Workflow</h2>
-<p class="notice"><strong>Demonstration only:</strong> Everything below is sample data saved only in this browser. No actual jobs, bids, messages or appointments are sent to anyone. Do not enter personal or customer details.</p>
-<div class="atc-flow-actions">
-<button class="btn" id="flowCreate" type="button">Create sample job</button>
-<button class="btn secondary" id="flowReset" type="button">Reset sample workflow</button>
-</div>
-<p id="flowStatus" role="status" aria-live="polite"></p>
-<div class="atc-flow-grid">
-<div class="atc-flow-card"><h4>📋 Customer job</h4><div id="flowJob"></div></div>
-<div class="atc-flow-card"><h4>📨 Provider bid</h4><div id="flowBid"></div></div>
-<div class="atc-flow-card"><h4>📅 Appointment</h4><div id="flowBooking"></div></div>
-<div class="atc-flow-card"><h4>⭐ Completion & review</h4><div id="flowReview"></div></div>
-</div>
-<p class="atc-flow-note">Try the full journey here first. Secure Supabase database tables and access rules are required before launching a real marketplace.</p>
-</div></section>
 <script>
 (function(){
- const KEY='atc-flow-demo-v1';
- const el=id=>document.getElementById(id);
- const fresh=()=>({step:0,job:'Sample bathroom vanity replacement',town:'Amherstburg',quote:275,appointment:'2026-11-02T10:00'});
- let d;try{d=JSON.parse(localStorage.getItem(KEY))}catch(e){}
- if(!d||typeof d.step!=='number'||d.step<0||d.step>6)d=fresh();
- const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(d))}catch(e){}};
- const button=(label,action)=>{const b=document.createElement('button');b.type='button';b.className='btn secondary';b.textContent=label;b.addEventListener('click',action);return b};
- const text=(id,...lines)=>{let node=el(id);node.replaceChildren();lines.forEach(line=>{let p=document.createElement('p');p.textContent=line;node.append(p)});return node};
- function advance(n){d.step=n;save();render()}
- function render(){
-  const job=text('flowJob',d.step===0?'No sample job created yet.':d.job,d.step===0?'':`Location: ${d.town}`,d.step===0?'':`Status: ${['','Open for bids','Bid received','Provider hired','Scheduled','Completed','Reviewed'][d.step]}`);
-  const bid=text('flowBid',d.step<2?'Waiting for a sample bid.':`Sample provider quote: $${d.quote} CAD`);
-  const booking=text('flowBooking',d.step<3?'Hire a sample provider to continue.':d.step===3?'Provider hired; appointment not yet confirmed.':`Sample appointment: Nov 2, 2026 at 10:00 AM`);
-  const review=text('flowReview',d.step<5?'Waiting for job completion.':d.step===5?'Sample job marked completed.':'Sample review: 5 stars');
-  if(d.step===1)job.append(button('Generate sample bid',()=>advance(2)));
-  if(d.step===2)bid.append(button('Accept sample bid',()=>advance(3)));
-  if(d.step===3)booking.append(button('Confirm sample appointment',()=>advance(4)));
-  if(d.step===4)booking.append(button('Mark sample job completed',()=>advance(5)));
-  if(d.step===5)review.append(button('Leave sample 5-star review',()=>advance(6)));
-  el('flowStatus').textContent=d.step===0?'Create a sample job to begin.':d.step===6?'Demo complete! The entire sample workflow was tested.':'Continue through the sample workflow using the buttons below.';
- }
- el('flowCreate').addEventListener('click',()=>advance(1));
- el('flowReset').addEventListener('click',()=>{d=fresh();advance(0)});
- render();
+const input=document.getElementById('jobPhotos'),preview=document.getElementById('jobPhotoPreview');
+if(!input||!preview)return;
+let urls=[];
+input.addEventListener('change',()=>{
+urls.forEach(URL.revokeObjectURL);urls=[];preview.replaceChildren();
+const selected=Array.from(input.files||[]);
+if(selected.length>6){alert('Please choose up to 6 photos.');input.value='';return;}
+for(const file of selected){if(!file.type.startsWith('image/')||file.size>8*1024*1024){alert('Photos must be images under 8 MB each.');input.value='';preview.replaceChildren();return;}
+const url=URL.createObjectURL(file);urls.push(url);const fig=document.createElement('figure');const img=document.createElement('img');img.src=url;img.alt='Selected job photo';const caption=document.createElement('figcaption');caption.textContent=file.name;fig.append(img,caption);preview.append(fig);}
+});
+window.addEventListener('pagehide',()=>urls.forEach(URL.revokeObjectURL));
 })();
-</script>
-
-
-<style>
-#dualDash{max-width:1140px;margin:35px auto;padding:0 20px}
-#dualDash .panel{max-width:none;margin:0}
-.dd-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
-.dd-tabs button{border:1px solid #bdd6c9;background:white;border-radius:10px;padding:11px 16px;cursor:pointer;font-weight:750;color:#184b3a}
-.dd-tabs button[aria-pressed=true]{background:#145b46;color:white}
-.dd-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:13px}
-.dd-card{background:#fff;border:1px solid #dce9e2;border-radius:12px;padding:17px}
-.dd-card h3{margin:0 0 8px;font-size:18px}
-.dd-card p{margin:8px 0}
-.dd-card .btn{margin:5px 5px 0 0;padding:9px 12px;font-size:13px}
-.dd-card input,.dd-card select{margin:6px 0}
-.dd-status{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.7px;color:#16684d}
-.dd-small{font-size:13px;color:#597168}
-#dualDash [hidden]{display:none!important}
-</style>
-<section id="dualDash" aria-label="Connected customer and provider dashboard demonstration">
-<div class="panel">
-<p class="eyebrow" style="color:#16815f!important">Dashboard V3 · connected two-sided demo</p>
-<h2>Customer + Local Service Provider</h2>
-<p class="notice"><strong>Private test area:</strong> This is a working two-sided demonstration on this device only. Jobs, bids, appointments and messages here are examples, not live marketplace transactions. Avoid entering real personal information.</p>
-<div class="dd-tabs" role="group" aria-label="Choose dashboard">
-<button type="button" id="ddCustomer" aria-pressed="true">🏡 Customer dashboard</button>
-<button type="button" id="ddProvider" aria-pressed="false">🧰 Provider dashboard</button>
-<button type="button" id="ddReset">Reset demo</button>
-</div>
-<p id="ddFeedback" role="status" aria-live="polite"></p>
-<div id="ddCustomerView">
-<h3>Post a sample job</h3>
-<form id="ddJobForm" class="dd-grid">
-<div><label for="ddTitle">Job title</label><input id="ddTitle" maxlength="80" required placeholder="e.g. Paint a bedroom"></div>
-<div><label for="ddCategory">Category</label><select id="ddCategory"><option>Home Improvements</option><option>Lawn & Garden</option><option>Cleaning</option><option>Small Car Repairs</option><option>Other</option></select></div>
-<div><label for="ddTown">Town</label><select id="ddTown"><option>Amherstburg</option><option>Windsor</option><option>Leamington</option><option>Kingsville</option><option>Other area</option></select></div><div class="dd-photo-field"><label for="ddPhotos">Job photos (optional, up to 10)</label><input id="ddPhotos" type="file" accept="image/*" multiple><p class="dd-small">Photos stay in this browser for this private demo. Avoid personal or sensitive photos.</p><div id="ddPhotoPreview" class="dd-photo-grid"></div></div><div><button class="btn" type="submit">Post sample job</button></div>
-</form>
-<h3>Your sample jobs</h3><div id="ddCustomerJobs" class="dd-grid"></div>
-</div>
-<div id="ddProviderView" hidden>
-<h3>Available sample jobs</h3><p class="dd-small">Submit one quote per job. Switch to Customer to accept it.</p>
-<div id="ddProviderJobs" class="dd-grid"></div>
-</div>
-</div>
-</section>
-<script>
-(()=>{
-const KEY='atc-dual-dash-v3', $=id=>document.getElementById(id);
-let pendingPhotos=[];
-const photoStyle=document.createElement('style');photoStyle.textContent='.dd-photo-field{grid-column:1/-1}.dd-photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(95px,1fr));gap:10px;margin:10px 0}.dd-photo-grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:9px;border:1px solid #dce9e2}.dd-photo-grid button{font-size:12px;padding:5px;margin-top:4px}.dd-photo-grid figure{margin:0}.dd-photo-grid figcaption{font-size:12px;overflow-wrap:anywhere}.dd-photo-view{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin:12px 0}.dd-photo-view img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;cursor:zoom-in}.dd-photo-view a{display:block}';document.head.append(photoStyle);
-function photoPreview(){const root=$('ddPhotoPreview');root.replaceChildren();pendingPhotos.forEach((photo,index)=>{const f=document.createElement('figure'),img=document.createElement('img');img.src=photo.data;img.alt='Selected job photo '+(index+1);f.append(img);const b=document.createElement('button');b.type='button';b.className='btn secondary';b.textContent='Remove';b.addEventListener('click',()=>{pendingPhotos.splice(index,1);photoPreview()});f.append(b);root.append(f)})}
-function shrinkPhoto(file){return new Promise((resolve,reject)=>{const url=URL.createObjectURL(file),img=new Image();img.onload=()=>{try{const scale=Math.min(1,850/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*scale));c.height=Math.max(1,Math.round(img.height*scale));c.getContext('2d').drawImage(img,0,0,c.width,c.height);resolve({data:c.toDataURL('image/jpeg',.65),name:file.name})}catch(e){reject(e)}finally{URL.revokeObjectURL(url)}};img.onerror=()=>{URL.revokeObjectURL(url);reject(new Error('Could not read photo'))};img.src=url})}
-$('ddPhotos').addEventListener('change',async e=>{const files=Array.from(e.target.files);if(files.length+pendingPhotos.length>10){tell('Maximum 10 photos per job.');e.target.value='';return}for(const file of files){if(!file.type.startsWith('image/')||file.size>12*1024*1024){tell('Please choose image files under 12 MB each.');continue}try{pendingPhotos.push(await shrinkPhoto(file))}catch(err){tell('One photo could not be loaded.')}}e.target.value='';photoPreview()});
-const seed=()=>({jobs:[{id:1,title:'Replace bathroom vanity',category:'Home Improvements',town:'Amherstburg',status:'open',bid:null,appointment:null,messages:[],review:null}],nextId:2});
-let data;try{data=JSON.parse(localStorage.getItem(KEY))}catch(e){}
-if(!data||!Array.isArray(data.jobs)||typeof data.nextId!=='number')data=seed();
-let role='customer';
-const persist=()=>{try{localStorage.setItem(KEY,JSON.stringify(data));return true}catch(e){tell('Browser storage is full. Try fewer or smaller photos. Job was not saved.');return false}};
-const element=(tag,content,cls)=>{const n=document.createElement(tag);if(content!==undefined)n.textContent=content;if(cls)n.className=cls;return n};
-const action=(parent,label,fn)=>{const b=element('button',label,'btn secondary');b.type='button';b.addEventListener('click',fn);parent.append(b);return b};
-const line=(parent,label,cls)=>parent.append(element('p',label,cls));
-const tell=msg=>{$('ddFeedback').textContent=msg};
-function switchRole(r){role=r;$('ddCustomerView').hidden=r!=='customer';$('ddProviderView').hidden=r!=='provider';$('ddCustomer').setAttribute('aria-pressed',r==='customer');$('ddProvider').setAttribute('aria-pressed',r==='provider');render()}
-function card(job,side){
- const n=element('article',undefined,'dd-card');n.append(element('div',job.status.replaceAll('_',' '),'dd-status'),element('h3',job.title));
- line(n,job.category+' · '+job.town,'dd-small');
- if(Array.isArray(job.photos)&&job.photos.length){const gallery=element('div',undefined,'dd-photo-view');job.photos.forEach((photo,index)=>{if(!photo||typeof photo.data!=='string'||!photo.data.startsWith('data:image/'))return;const a=document.createElement('a');a.href=photo.data;a.target='_blank';a.rel='noopener';a.title='Open full photo';const img=document.createElement('img');img.src=photo.data;img.alt='Job photo '+(index+1);img.loading='lazy';a.append(img);gallery.append(a)});n.append(gallery)}
- if(job.bid)line(n,'Quote: $'+job.bid.amount+' CAD');
- if(job.appointment)line(n,'Appointment: '+new Date(job.appointment+'T12:00:00').toLocaleDateString('en-CA',{year:'numeric',month:'short',day:'numeric'})+' at '+job.time);
- if(side==='provider'&&job.status==='open'){
-   if(!job.bid){
-    const price=element('input');price.type='number';price.min='1';price.max='1000000';price.step='1';price.placeholder='Quote amount (CAD)';price.setAttribute('aria-label','Quote amount in Canadian dollars');n.append(price);
-    action(n,'Submit sample quote',()=>{const amount=Number(price.value);if(!Number.isInteger(amount)||amount<1||amount>1000000){tell('Enter a whole-dollar quote between $1 and $1,000,000.');return}job.bid={amount};job.status='quoted';persist();tell('Sample quote sent. Switch to Customer to accept it.');render()});
-   }
- }
- if(side==='customer'&&job.status==='quoted'){
-   action(n,'Accept quote',()=>{job.status='hired';persist();tell('Quote accepted. Switch to Provider to propose a date.');render()});
-   action(n,'Decline quote',()=>{job.bid=null;job.status='open';persist();render()});
- }
- if(side==='provider'&&job.status==='hired'){
-   const date=element('input');date.type='date';date.min='2026-10-26';date.value='2026-11-02';date.setAttribute('aria-label','Proposed appointment date');
-   const time=element('input');time.type='time';time.value='10:00';time.setAttribute('aria-label','Proposed appointment time');
-   n.append(date,time);action(n,'Propose appointment',()=>{if(!date.value||!time.value){tell('Choose a date and time.');return}job.appointment=date.value;job.time=time.value;job.status='proposed';persist();tell('Appointment proposed. Customer must confirm.');render()});
- }
- if(side==='customer'&&job.status==='proposed'){
-   action(n,'Confirm appointment',()=>{job.status='scheduled';persist();render()});
-   action(n,'Request new date',()=>{job.status='hired';job.appointment=null;persist();render()});
- }
- if(side==='provider'&&job.status==='scheduled')action(n,'Mark work complete',()=>{job.status='completed';persist();render()});
- if(side==='customer'&&job.status==='completed')action(n,'Leave 5-star sample review',()=>{job.review=5;job.status='reviewed';persist();render()});
- if(job.review)line(n,'⭐ '+job.review+'/5 sample review');
- if(['hired','proposed','scheduled','completed','reviewed'].includes(job.status)){
-  const input=element('input');input.maxLength=180;input.placeholder='Sample message';input.setAttribute('aria-label','Sample message');n.append(input);
-  action(n,'Send sample message',()=>{const msg=input.value.trim();if(!msg)return;job.messages.push({by:side,text:msg});persist();render()});
-  if(job.messages.length){line(n,'Conversation','dd-small');job.messages.forEach(m=>line(n,(m.by==='customer'?'Customer: ':'Provider: ')+m.text,'dd-small'))}
- }
- return n;
-}
-function render(){
- const c=$('ddCustomerJobs'),p=$('ddProviderJobs');c.replaceChildren();p.replaceChildren();
- if(!data.jobs.length){line(c,'No sample jobs yet.');line(p,'No available jobs yet.')}
- data.jobs.slice().reverse().forEach(j=>{c.append(card(j,'customer'));p.append(card(j,'provider'))});
-}
-$('ddCustomer').addEventListener('click',()=>switchRole('customer'));
-$('ddProvider').addEventListener('click',()=>switchRole('provider'));
-$('ddReset').addEventListener('click',()=>{data=seed();persist();tell('Sample jobs reset.');render()});
-$('ddJobForm').addEventListener('submit',e=>{e.preventDefault();const title=$('ddTitle').value.trim();if(!title)return;data.jobs.push({id:data.nextId++,title,category:$('ddCategory').value,town:$('ddTown').value,status:'open',bid:null,appointment:null,messages:[],review:null,photos:pendingPhotos.slice()});if(!persist()){data.jobs.pop();data.nextId--;return;}$('ddJobForm').reset();pendingPhotos=[];photoPreview();tell('Sample job posted. Switch to Provider to place a bid.');render()});
-render();
-})();
-</script>
-
-</body></html>
+</script></body></html>
