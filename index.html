@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>Around the Corner V29 | Local help. Close to home.</title>
+<title>Around the Corner V31 | Local help. Close to home.</title>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#18322d;background:#f6faf7}*{box-sizing:border-box}body{margin:0}header{background:white;border-bottom:1px solid #e0e9e4;padding:18px max(20px,calc((100vw - 1100px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.logo{font-weight:850;font-size:23px;color:#16684d}nav a{color:#275647;text-decoration:none;margin-left:15px;font-weight:600}.hero{background:linear-gradient(130deg,#0e6049,#21886c);color:white;padding:75px 20px;text-align:center}.hero h1{font-size:clamp(34px,6vw,56px);margin:0 0 14px}.hero p{font-size:19px;max-width:620px;margin:0 auto 24px}.btn{border:0;border-radius:9px;padding:13px 19px;background:#f3b948;color:#18322d;font-weight:800;cursor:pointer;display:inline-block;text-decoration:none}.btn.secondary{background:#e3f2e9}.container{max-width:1100px;margin:auto;padding:42px 20px}h2{font-size:29px;margin:0 0 10px}.muted{color:#597168}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:15px;margin-top:24px}.tile,.panel{background:white;border:1px solid #dce9e2;border-radius:15px;padding:22px;box-shadow:0 3px 12px #153d2810}.tile{font-size:18px;font-weight:700}.tile span{display:block;font-size:30px;margin-bottom:10px}.panel{max-width:720px;margin:25px auto}label{display:block;font-weight:700;margin:16px 0 6px}input,select,textarea{width:100%;border:1px solid #bbd0c5;border-radius:8px;padding:12px;font:inherit}textarea{min-height:100px}footer{background:#173c31;color:white;text-align:center;padding:30px 15px;margin-top:30px}.notice{background:#fff6d9;border:1px solid #f0d18a;padding:13px;border-radius:9px;margin-top:18px}#result{margin-top:15px;font-weight:700}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #d79a17;outline-offset:2px}
 /* Stronger Around the Corner masthead */
@@ -404,15 +404,38 @@ async function user(){const {data,error}=await db.auth.getUser();if(error||!data
 async function prepareJobPhoto(file){
   if(!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('Photos must be JPEG, PNG or WebP.');
   if(file.size>10*1024*1024)throw Error('Each original photo must be 10 MB or less.');
-  const bitmap=await createImageBitmap(file);
-  try{
-    const scale=Math.min(1,1600/Math.max(bitmap.width,bitmap.height));
-    const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
-    canvas.getContext('2d').drawImage(bitmap,0,0,canvas.width,canvas.height);
+  // HTMLImageElement fallback supports mobile browsers where createImageBitmap rejects camera files.
+  let source, release=()=>{};
+  try {
+    try {
+      if(typeof createImageBitmap!=='function')throw Error('Bitmap decoding unavailable');
+      source=await createImageBitmap(file);
+      release=()=>source.close();
+    } catch(bitmapError) {
+      const url=URL.createObjectURL(file);
+      try {
+        source=await new Promise((resolve,reject)=>{
+          const img=new Image();
+          img.onload=()=>resolve(img);
+          img.onerror=()=>reject(Error('This photo cannot be opened by the browser. Try a different JPEG or PNG image.'));
+          img.src=url;
+        });
+        release=()=>URL.revokeObjectURL(url);
+      } catch(e) {URL.revokeObjectURL(url);throw e;}
+    }
+    const width=source.naturalWidth||source.width,height=source.naturalHeight||source.height;
+    if(!width||!height)throw Error('The selected photo has invalid dimensions.');
+    const scale=Math.min(1,1600/Math.max(width,height));
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.max(1,Math.round(width*scale));
+    canvas.height=Math.max(1,Math.round(height*scale));
+    const ctx=canvas.getContext('2d');
+    if(!ctx)throw Error('Your browser could not prepare the photo.');
+    ctx.drawImage(source,0,0,canvas.width,canvas.height);
     const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.82));
     if(!blob||blob.size>5*1024*1024)throw Error('Photo compression failed or image is too large.');
     return blob;
-  }finally{bitmap.close()}
+  } finally {release();}
 }
 async function publish(){
   const button=el('livePublish');if(button.disabled)return;
