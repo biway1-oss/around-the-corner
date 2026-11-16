@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>Around the Corner V34 | Local help. Close to home.</title>
+<title>Around the Corner V31 | Local help. Close to home.</title>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#18322d;background:#f6faf7}*{box-sizing:border-box}body{margin:0}header{background:white;border-bottom:1px solid #e0e9e4;padding:18px max(20px,calc((100vw - 1100px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.logo{font-weight:850;font-size:23px;color:#16684d}nav a{color:#275647;text-decoration:none;margin-left:15px;font-weight:600}.hero{background:linear-gradient(130deg,#0e6049,#21886c);color:white;padding:75px 20px;text-align:center}.hero h1{font-size:clamp(34px,6vw,56px);margin:0 0 14px}.hero p{font-size:19px;max-width:620px;margin:0 auto 24px}.btn{border:0;border-radius:9px;padding:13px 19px;background:#f3b948;color:#18322d;font-weight:800;cursor:pointer;display:inline-block;text-decoration:none}.btn.secondary{background:#e3f2e9}.container{max-width:1100px;margin:auto;padding:42px 20px}h2{font-size:29px;margin:0 0 10px}.muted{color:#597168}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:15px;margin-top:24px}.tile,.panel{background:white;border:1px solid #dce9e2;border-radius:15px;padding:22px;box-shadow:0 3px 12px #153d2810}.tile{font-size:18px;font-weight:700}.tile span{display:block;font-size:30px;margin-bottom:10px}.panel{max-width:720px;margin:25px auto}label{display:block;font-weight:700;margin:16px 0 6px}input,select,textarea{width:100%;border:1px solid #bbd0c5;border-radius:8px;padding:12px;font:inherit}textarea{min-height:100px}footer{background:#173c31;color:white;text-align:center;padding:30px 15px;margin-top:30px}.notice{background:#fff6d9;border:1px solid #f0d18a;padding:13px;border-radius:9px;margin-top:18px}#result{margin-top:15px;font-weight:700}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #d79a17;outline-offset:2px}
 /* Stronger Around the Corner masthead */
@@ -158,16 +158,7 @@ body:not(.v21-dev) #v21DevNotice{display:none}
  header>.v22-portal-nav .v22-portal-menu{right:0;max-width:calc(100vw - 32px)}
 }
 </style>
-<style id="atc-v32-photo-styles">.atc-v32-job-photos{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}.atc-v32-job-photos img{width:112px;height:112px;max-width:45%;object-fit:cover;border-radius:10px;border:1px solid #dce9e2;cursor:zoom-in}.atc-v32-job-photos img:active{object-fit:contain}.atc-v32-job-photos small{color:#85501d}</style><style id="atc-v34-styles">
-.atc-v34-job-photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:10px;margin:12px 0}
-.atc-v34-job-photos>.atc-photo-status{grid-column:1/-1;font-size:12px;color:#416658}
-.atc-v34-photo-tile{min-width:0;border-radius:10px;overflow:hidden;background:#f2f7f3;border:1px solid #dce9e2;padding:5px}
-.atc-v34-photo-tile img{display:block;width:100%;height:125px;object-fit:cover;border-radius:7px;cursor:zoom-in}
-.atc-v34-photo-tile small{display:block;font-size:11px;padding:5px;overflow-wrap:anywhere}
-.atc-v34-retry{font-size:12px;padding:8px 12px;margin-top:8px!important}
-.atc-v33-job-details[hidden]{display:none!important}
-</style>
-</head>
+<style id="atc-v32-photo-styles">.atc-v32-job-photos{display:flex;flex-wrap:wrap;gap:9px;margin:12px 0}.atc-v32-job-photos img{width:112px;height:112px;max-width:45%;object-fit:cover;border-radius:10px;border:1px solid #dce9e2;cursor:zoom-in}.atc-v32-job-photos img:active{object-fit:contain}.atc-v32-job-photos small{color:#85501d}</style></head>
 <body>
 <header><a aria-label="Around the Corner home" class="logo" href="#"><span aria-hidden="true" class="logo-pin">📍</span><span><span class="logo-name">Around the Corner</span><span class="logo-tagline">Local help. Close to home.</span></span></a><div class="v22-portal-nav" id="v22PortalNav"><button aria-controls="v22PortalMenu" aria-expanded="false" id="v22PortalButton" type="button">Sign in</button><div class="v22-portal-menu" hidden="" id="v22PortalMenu"><button data-v22-role="customer" type="button">Customer Portal<small>My jobs, quotes and messages</small></button><button data-v22-role="provider" type="button">Service Provider Portal<small>Find jobs and manage work</small></button></div></div><nav><a href="#services">Services</a><a href="#post">Post a Job</a></nav><a hidden="" href="#myDashboard" id="dashboardNav" style="background:#145b46;color:white;padding:12px 16px;border-radius:10px;text-decoration:none;font-weight:700">My Dashboard</a><div class="notification-wrap"><button aria-controls="notificationPanel" aria-expanded="false" aria-label="Notifications" class="notification-trigger" id="notificationToggle" type="button">🔔<span class="notification-count" hidden="" id="notificationCount">0</span></button><div class="notification-popover" hidden="" id="notificationPanel"><h3>Notifications</h3><div class="notification-demo-label">Preview only · No messages are being sent</div><div aria-live="polite" id="notificationItems"></div><div class="notification-controls"><button id="markNotificationsRead" type="button">Mark all read</button><button id="testNotification" type="button">Try a sample alert</button></div><details class="notification-preferences"><summary style="margin-top:15px;cursor:pointer;font-weight:700">Notification preferences</summary><label><input checked="" id="prefMessages" type="checkbox"/> Messages and replies</label><label><input checked="" id="prefQuotes" type="checkbox"/> Quotes and job updates</label><label><input checked="" id="prefSchedule" type="checkbox"/> Appointment reminders</label><p class="notification-demo-label">Preferences are saved only in this browser. Email, push and SMS delivery are not connected yet.</p></details></div></div></header>
 <section class="hero"><div class="hero-inner"><div class="hero-content"><p class="eyebrow">Your neighbourhood service marketplace</p><h1>Good help is just <em>around the corner.</em></h1><p>Find local service providers for the jobs around your home, yard, and neighbourhood.</p><div class="hero-actions"><a class="btn" href="#post">Post a Job →</a><a class="btn secondary" href="#providers">Become a Local Service Provider</a></div></div><div aria-label="A tree-lined Canadian neighbourhood" class="hero-picture" role="img"><div class="hero-trust">📍 Local People   ·   🤝 Stronger Communities</div></div></div></section>
@@ -450,66 +441,69 @@ async function prepareJobPhoto(file){
 async function publish(){
   const button=el('livePublish');if(button.disabled)return;
   button.disabled=true;
+  let createdJob=null;
   try{
     const u=await user();
     const title=el('jobTitle').value.trim(),description=el('description').value.trim(),category=el('category').value,area=el('area').value.trim();
-    if(!title||!description||!category||!area)throw Error('Fill in the job title, category, description and town above first.');
+    if(!title||!description||!category||!area)throw Error('Fill in the job title, category, description and town first.');
     const files=Array.from(el('jobPhotos').files);
     if(files.length>6)throw Error('Choose no more than six photos.');
-    // Validate and resize before creating the job, to avoid avoidable partial uploads.
     msg(files.length?'Preparing photos…':'Publishing job…');
     const images=[];for(const file of files)images.push(await prepareJobPhoto(file));
     const {data:job,error}=await db.from('atc_jobs').insert({customer_id:u.id,title,description,category,area,dimensions:el('dimensions').value.trim()}).select('id').single();
     if(error)throw error;
-    let uploaded=0;const failures=[];
+    createdJob=job.id;
+    const failures=[];let uploaded=0;
     for(let i=0;i<images.length;i++){
-      msg(`Job published. Uploading photo ${i+1} of ${images.length}…`);
       const id=crypto.randomUUID(),path=`${u.id}/${id}.jpg`;
+      msg(`Uploading photo ${i+1} of ${images.length}…`);
       try{
-        const result=await db.storage.from('atc-photos').upload(path,images[i],{contentType:'image/jpeg',upsert:false});
-        if(result.error)throw result.error;
-        const record=await db.from('atc_photos').insert({id,owner_id:u.id,kind:'job',target_id:job.id,object_path:path,caption:'',is_public:false});
-        if(record.error){await db.storage.from('atc-photos').remove([path]);throw record.error;}
+        const storage=await db.storage.from('atc-photos').upload(path,images[i],{contentType:'image/jpeg',upsert:false});
+        if(storage.error)throw Error('Storage: '+storage.error.message);
+        const row=await db.from('atc_photos').insert({id,owner_id:u.id,kind:'job',target_id:job.id,object_path:path,caption:'',is_public:true}).select('id').single();
+        if(row.error){await db.storage.from('atc-photos').remove([path]);throw Error('Photo database: '+row.error.message);}
         uploaded++;
       }catch(e){failures.push(`Photo ${i+1}: ${e.message}`);}
     }
-    msg(failures.length?`Job published, but ${failures.length} photo(s) failed: ${failures.join('; ')}. Retry them in Job Photos using job ID ${job.id}.`:`Job published successfully${uploaded?` with ${uploaded} photo(s)`:''}. Job ID: ${job.id}`);
     el('v13JobId').value=job.id;
     if(!failures.length){el('jobPhotos').value='';el('jobPhotoPreview').replaceChildren();}
-    try{await refresh()}catch(e){msg('Job published, but refreshing jobs failed: '+e.message);}
-  }catch(e){msg('Could not publish: '+e.message)}finally{button.disabled=false;}
+    try{await refresh()}catch(e){console.warn('Job refresh failed',e);}
+    const result=failures.length?`Job saved (${job.id}), but photo upload failed: ${failures.join('; ')}. Keep your selected photos and retry using Job Photos.`:`Job published successfully with ${uploaded} photo(s). Job ID: ${job.id}`;
+    msg(result);
+    el('result').textContent=result;
+  }catch(e){const result=`${createdJob?'Job saved but photo processing failed':'Could not publish'}: ${e.message}`;msg(result);el('result').textContent=result;}
+  finally{button.disabled=false;}
 }
 async function quote(job){try{const u=await user();if(u.id===job.customer_id)throw Error('You cannot quote on your own job.');const labour=prompt('Labour cost in CAD (numbers only)');if(labour===null)return;const materials=prompt('Materials cost in CAD (numbers only)');if(materials===null)return;const a=Number(labour),b=Number(materials);if(!Number.isFinite(a)||!Number.isFinite(b)||a<0||b<0||!String(labour).trim()||!String(materials).trim())throw Error('Enter valid non-negative amounts.');const notes=prompt('Quote notes (optional, max 500 characters)')||'';if(notes.length>500)throw Error('Notes too long.');const {error}=await db.from('atc_quotes').insert({job_id:job.id,provider_id:u.id,labour:a,materials:b,notes});if(error)throw error;msg('Quote sent.');await refresh()}catch(e){msg('Quote not sent: '+e.message)}}
 async function accept(job,q){try{if(!confirm('Accept this quote? Other quotes will be declined.'))return;const {error}=await db.rpc('atc_accept_quote',{p_job_id:job.id,p_quote_id:q.id});if(error)throw error;msg('Quote accepted. Job is now booked.');await refresh()}catch(e){msg('Could not accept quote: '+e.message)}}
 async function loadJobCardPhotos(jobId,card){
   const gallery=document.createElement('div');
-  gallery.className='atc-v34-job-photos';
+  gallery.className='atc-v32-job-photos';
   gallery.setAttribute('aria-label','Job photos');
-  const status=item('small','Loading attached photos…');status.className='atc-photo-status';
-  gallery.append(status);card.append(gallery);
-  const load=async()=>{
-    gallery.replaceChildren();gallery.append(status);status.textContent='Loading attached photos…';
-    try{
-      const {data,error}=await db.from('atc_photos').select('id,object_path,caption').eq('kind','job').eq('target_id',jobId).order('created_at',{ascending:true});
-      if(error)throw Error('Photo records: '+error.message);
-      if(!data?.length){status.textContent='No photos linked to this job in atc_photos.';return;}
-      status.textContent=data.length+' attached photo'+(data.length===1?'':'s');
-      let failed=0;
-      for(const photo of data){
-        const tile=document.createElement('div');tile.className='atc-v34-photo-tile';
-        const {data:link,error:linkError}=await db.storage.from('atc-photos').createSignedUrl(photo.object_path,3600);
-        if(linkError){failed++;tile.append(item('small','Photo access error: '+linkError.message));gallery.append(tile);continue;}
-        const img=document.createElement('img');img.src=link.signedUrl;img.alt=photo.caption||'Photo attached to job';img.loading='lazy';
-        img.onerror=()=>{img.replaceWith(item('small','Image could not load. Check the storage file and access policies.'));};
-        img.onclick=()=>window.open(link.signedUrl,'_blank','noopener,noreferrer');
-        img.title='Tap to view full photo';tile.append(img);
-        if(photo.caption)tile.append(item('small',photo.caption));gallery.append(tile);
-      }
-      if(failed)status.textContent+=' · '+failed+' could not be accessed';
-    }catch(e){status.textContent='Photos unavailable: '+e.message;}
-  };
-  const retry=btn('Retry photos',load);retry.className='btn secondary atc-v34-retry';card.append(retry);
-  await load();
+  card.append(gallery);
+  try{
+    const {data,error}=await db.from('atc_photos').select('object_path,caption').eq('kind','job').eq('target_id',jobId).order('created_at',{ascending:true});
+    if(error)throw error;
+    if(!data?.length){
+      const note=document.createElement('small');
+      note.textContent='No photos attached to this job yet.';
+      note.className='atc-photo-status'; gallery.append(note);return;
+    }
+    for(const photo of data){
+      const {data:link,error:linkError}=await db.storage.from('atc-photos').createSignedUrl(photo.object_path,3600);
+      if(linkError)throw linkError;
+      const img=document.createElement('img');
+      img.src=link.signedUrl;
+      img.alt=photo.caption||'Photo attached to job';
+      img.loading='lazy';
+      img.addEventListener('error',()=>{img.replaceWith(Object.assign(document.createElement('small'),{textContent:'Photo could not be displayed.'}));});
+      gallery.append(img);
+    }
+  }catch(e){
+    const warning=document.createElement('small');
+    warning.textContent='Job photos unavailable: '+e.message;
+    gallery.append(warning);
+  }
 }
 async function refresh(){try{const u=await user();msg('Loading jobs…');const [jobsResult,quotesResult]=await Promise.all([db.from('atc_jobs').select('*').order('created_at',{ascending:false}).limit(100),db.from('atc_quotes').select('*')]);if(jobsResult.error)throw jobsResult.error;if(quotesResult.error)throw quotesResult.error;const jobs=jobsResult.data||[],quotes=quotesResult.data||[];for(const id of ['liveMine','liveOpen'])el(id).replaceChildren();const mine=jobs.filter(j=>j.customer_id===u.id),open=jobs.filter(j=>j.status==='open'&&j.customer_id!==u.id);if(!mine.length)el('liveMine').append(item('p','No online jobs posted yet.'));if(!open.length)el('liveOpen').append(item('p','No open jobs available right now.'));for(const [target,arr] of [['liveMine',mine],['liveOpen',open]])for(const j of arr){const c=document.createElement('div');c.className='tile';c.style.marginBottom='12px';if(target==='liveOpen'){c.dataset.atcJob='1';c.dataset.jobId=j.id;c.dataset.category=j.category||'';c.dataset.area=j.area||'';c.dataset.search=[j.title,j.description,j.category,j.area].join(' ').toLowerCase()}const details=document.createElement('div');details.className='atc-v33-job-details';
       details.append(item('strong',j.title),item('p',j.category+' · '+j.area+' · '+j.status),item('p',j.description));
@@ -520,9 +514,9 @@ async function refresh(){try{const u=await user();msg('Loading jobs…');const [
           details.hidden=!expanded;
           toggle.textContent=expanded?'Hide job details':'View job details & photos';
         });
-        c.insertBefore(item('strong',j.title),details);c.insertBefore(item('p',(j.category||'Service')+' · '+(j.area||'Area')),details);c.insertBefore(toggle,details);
+        c.insertBefore(toggle,details);
         details.hidden=true;
-      }if(j.dimensions)details.append(item('p','Details: '+j.dimensions));loadJobCardPhotos(j.id,details);if(target==='liveOpen'){const own=quotes.find(q=>q.job_id===j.id&&q.provider_id===u.id);c.append(own?item('p','Your quote: '+money(own.labour)+' labour + '+money(own.materials)+' materials · '+own.status):btn('Send quote',()=>quote(j)))}else{const qs=quotes.filter(q=>q.job_id===j.id);c.append(item('p',qs.length+' quote(s)'));for(const q of qs){const p=document.createElement('div');p.style.borderTop='1px solid #ddd';p.style.padding='8px 0';p.append(item('p',money(q.labour)+' labour + '+money(q.materials)+' materials · '+q.status));if(q.notes)p.append(item('p',q.notes));if(j.status==='open'&&q.status==='pending')p.append(btn('Accept quote',()=>accept(j,q)));c.append(p)}}el(target).append(c)}document.dispatchEvent(new Event('atc-jobs-refreshed'));msg('Online jobs updated.')}catch(e){msg('Could not load online jobs: '+e.message)}}
+      }if(j.dimensions)c.append(item('p','Details: '+j.dimensions));loadJobCardPhotos(j.id,details);if(target==='liveOpen'){const own=quotes.find(q=>q.job_id===j.id&&q.provider_id===u.id);c.append(own?item('p','Your quote: '+money(own.labour)+' labour + '+money(own.materials)+' materials · '+own.status):btn('Send quote',()=>quote(j)))}else{const qs=quotes.filter(q=>q.job_id===j.id);c.append(item('p',qs.length+' quote(s)'));for(const q of qs){const p=document.createElement('div');p.style.borderTop='1px solid #ddd';p.style.padding='8px 0';p.append(item('p',money(q.labour)+' labour + '+money(q.materials)+' materials · '+q.status));if(q.notes)p.append(item('p',q.notes));if(j.status==='open'&&q.status==='pending')p.append(btn('Accept quote',()=>accept(j,q)));c.append(p)}}el(target).append(c)}document.dispatchEvent(new Event('atc-jobs-refreshed'));msg('Online jobs updated.')}catch(e){msg('Could not load online jobs: '+e.message)}}
 // V30: publish directly from the customer job form, rather than a second section.
 const jobForm=el('jobForm');
 jobForm.addEventListener('submit',event=>{
