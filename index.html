@@ -462,7 +462,7 @@ async function publish(){
         const record=await db.from('atc_photos').insert({id,owner_id:u.id,kind:'job',target_id:job.id,object_path:path,caption:'',is_public:false});
         if(record.error){await db.storage.from('atc-photos').remove([path]);throw record.error;}
         uploaded++;
-      }catch(e){failures.push(`Photo ${i+1}: ${e.message}`);}
+      }catch(e){failures.push(`Photo ${i+1}: ${e.message}${/row-level security/i.test(e.message)?' (Supabase Storage policy: run the V37 SQL fix)':''}`);}
     }
     msg(failures.length?`Job published, but ${failures.length} photo(s) failed: ${failures.join('; ')}. Retry them in Job Photos using job ID ${job.id}.`:`Job published successfully${uploaded?` with ${uploaded} photo(s)`:''}. Job ID: ${job.id}`);
     el('v13JobId').value=job.id;
@@ -501,6 +501,61 @@ async function loadJobCardPhotos(jobId,card){
     gallery.append(warning);
   }
 }
+
+// V36: accessible provider job-details dialog with an inline quote form.
+function openProviderJob(job,existingQuote){
+  document.getElementById('atcProviderJobDialog')?.remove();
+  const overlay=document.createElement('div');
+  overlay.id='atcProviderJobDialog';
+  overlay.style.cssText='position:fixed;inset:0;background:rgba(8,22,35,.72);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px';
+  const panel=document.createElement('section');
+  panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','true');
+  panel.setAttribute('aria-label','Job details and quote');
+  panel.style.cssText='background:white;color:#172333;border-radius:16px;padding:24px;width:min(620px,100%);max-height:90vh;overflow:auto;box-shadow:0 16px 60px #0005';
+  const close=()=>{document.removeEventListener('keydown',onKey);overlay.remove()};
+  const onKey=e=>{if(e.key==='Escape')close()};
+  document.addEventListener('keydown',onKey);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)close()});
+  const top=document.createElement('div');top.style.cssText='display:flex;justify-content:space-between;gap:12px;align-items:start';
+  const heading=document.createElement('h2');heading.textContent=job.title||'Job details';heading.style.margin='0';
+  const x=btn('Close',close);top.append(heading,x);panel.append(top);
+  const info=item('p',(job.category||'Other')+' · '+(job.area||'Area not specified'));
+  panel.append(info,item('p',job.description||'No description provided.'));
+  if(job.dimensions)panel.append(item('p','Additional details: '+job.dimensions));
+  const photoTitle=document.createElement('h3');photoTitle.textContent='Customer photos';panel.append(photoTitle);
+  loadJobCardPhotos(job.id,panel);
+  if(existingQuote){
+    panel.append(item('p','You have already sent a quote: '+money(existingQuote.labour)+' labour + '+money(existingQuote.materials)+' materials ('+existingQuote.status+').'));
+  }else{
+    const question=document.createElement('h3');question.textContent='Would you like to send a quote?';panel.append(question);
+    const actions=document.createElement('div');actions.style.cssText='display:flex;gap:10px;flex-wrap:wrap';
+    const yes=btn('Yes — prepare quote',()=>{form.hidden=false;actions.hidden=true;labour.focus()});
+    const no=btn('Not interested',close);actions.append(yes,no);panel.append(actions);
+    const form=document.createElement('form');form.hidden=true;form.style.marginTop='16px';
+    const field=(label,type='text')=>{const wrap=document.createElement('label');wrap.style.cssText='display:block;margin:12px 0';wrap.textContent=label;const input=document.createElement('input');input.type=type;input.style.cssText='display:block;width:100%;padding:10px;margin-top:5px';wrap.append(input);form.append(wrap);return input};
+    const labour=field('Labour cost (CAD)','number');const materials=field('Materials cost (CAD)','number');
+    for(const input of [labour,materials]){input.min='0';input.step='0.01';input.required=true}
+    const notesLabel=document.createElement('label');notesLabel.textContent='Quote details (optional)';
+    const notes=document.createElement('textarea');notes.maxLength=500;notes.rows=3;notes.style.cssText='display:block;width:100%;margin:6px 0 12px';notesLabel.append(notes);form.append(notesLabel);
+    const error=document.createElement('p');error.setAttribute('role','status');form.append(error);
+    const send=document.createElement('button');send.className='btn';send.type='submit';send.textContent='Send quote to customer';form.append(send);
+    form.addEventListener('submit',async e=>{
+      e.preventDefault();const a=Number(labour.value),b=Number(materials.value);
+      if(!labour.value.trim()||!materials.value.trim()||!Number.isFinite(a)||!Number.isFinite(b)||a<0||b<0){error.textContent='Enter valid labour and material amounts.';return}
+      send.disabled=true;error.textContent='Sending quote…';
+      try{
+        const u=await user();
+        if(u.id===job.customer_id)throw Error('You cannot quote on your own job.');
+        const {error:dbError}=await db.from('atc_quotes').insert({job_id:job.id,provider_id:u.id,labour:a,materials:b,notes:notes.value.trim()});
+        if(dbError)throw dbError;
+        close();await refresh();msg('Quote sent to customer successfully.');
+      }catch(err){error.textContent='Quote not sent: '+err.message;send.disabled=false}
+    });
+    panel.append(form);
+  }
+  overlay.append(panel);document.body.append(overlay);x.focus();
+}
+
 async function refresh(){try{const u=await user();msg('Loading jobs…');const [jobsResult,quotesResult]=await Promise.all([db.from('atc_jobs').select('*').order('created_at',{ascending:false}).limit(100),db.from('atc_quotes').select('*')]);if(jobsResult.error)throw jobsResult.error;if(quotesResult.error)throw quotesResult.error;const jobs=jobsResult.data||[],quotes=quotesResult.data||[];for(const id of ['liveMine','liveOpen'])el(id).replaceChildren();const mine=jobs.filter(j=>j.customer_id===u.id),open=jobs.filter(j=>j.status==='open'&&j.customer_id!==u.id);if(!mine.length)el('liveMine').append(item('p','No online jobs posted yet.'));if(!open.length)el('liveOpen').append(item('p','No open jobs available right now.'));for(const [target,arr] of [['liveMine',mine],['liveOpen',open]])for(const j of arr){const c=document.createElement('div');c.className='tile';c.style.marginBottom='12px';if(target==='liveOpen'){c.dataset.atcJob='1';c.dataset.jobId=j.id;c.dataset.category=j.category||'';c.dataset.area=j.area||'';c.dataset.search=[j.title,j.description,j.category,j.area].join(' ').toLowerCase()}const details=document.createElement('div');details.className='atc-v33-job-details';
       details.append(item('strong',j.title),item('p',j.category+' · '+j.area+' · '+j.status),item('p',j.description));
       c.append(details);
@@ -512,7 +567,15 @@ async function refresh(){try{const u=await user();msg('Loading jobs…');const [
         });
         c.insertBefore(toggle,details);
         details.hidden=true;
-      }if(j.dimensions)c.append(item('p','Details: '+j.dimensions));loadJobCardPhotos(j.id,details);if(target==='liveOpen'){const own=quotes.find(q=>q.job_id===j.id&&q.provider_id===u.id);c.append(own?item('p','Your quote: '+money(own.labour)+' labour + '+money(own.materials)+' materials · '+own.status):btn('Send quote',()=>quote(j)))}else{const qs=quotes.filter(q=>q.job_id===j.id);c.append(item('p',qs.length+' quote(s)'));for(const q of qs){const p=document.createElement('div');p.style.borderTop='1px solid #ddd';p.style.padding='8px 0';p.append(item('p',money(q.labour)+' labour + '+money(q.materials)+' materials · '+q.status));if(q.notes)p.append(item('p',q.notes));if(j.status==='open'&&q.status==='pending')p.append(btn('Accept quote',()=>accept(j,q)));c.append(p)}}el(target).append(c)}document.dispatchEvent(new Event('atc-jobs-refreshed'));msg('Online jobs updated.')}catch(e){msg('Could not load online jobs: '+e.message)}}
+        c.style.cursor='pointer';
+        c.setAttribute('role','button');
+        c.setAttribute('tabindex','0');
+        c.setAttribute('aria-label','Open job details for '+j.title);
+        const openCard=()=>{const ownQuote=quotes.find(q=>q.job_id===j.id&&q.provider_id===u.id);openProviderJob(j,ownQuote)};
+        c.addEventListener('click',e=>{if(e.target.closest('button,a,input,textarea,select'))return;openCard()});
+        c.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target===c){e.preventDefault();openCard()}});
+        toggle.onclick=openCard;
+      }if(j.dimensions)c.append(item('p','Details: '+j.dimensions));loadJobCardPhotos(j.id,details);if(target==='liveOpen'){const own=quotes.find(q=>q.job_id===j.id&&q.provider_id===u.id);c.append(own?item('p','Your quote: '+money(own.labour)+' labour + '+money(own.materials)+' materials · '+own.status):btn('Review & send quote',()=>openProviderJob(j,null)))}else{const qs=quotes.filter(q=>q.job_id===j.id);c.append(item('p',qs.length+' quote(s)'));for(const q of qs){const p=document.createElement('div');p.style.borderTop='1px solid #ddd';p.style.padding='8px 0';p.append(item('p',money(q.labour)+' labour + '+money(q.materials)+' materials · '+q.status));if(q.notes)p.append(item('p',q.notes));if(j.status==='open'&&q.status==='pending')p.append(btn('Accept quote',()=>accept(j,q)));c.append(p)}}el(target).append(c)}document.dispatchEvent(new Event('atc-jobs-refreshed'));msg('Online jobs updated.')}catch(e){msg('Could not load online jobs: '+e.message)}}
 // V30: publish directly from the customer job form, rather than a second section.
 const jobForm=el('jobForm');
 jobForm.addEventListener('submit',event=>{
@@ -642,7 +705,7 @@ async function upload(kind,target,fileId,captionId,publicId,container){
     const path=`${u.id}/${id}.jpg`;
     notice('Uploading photo to storage…');
     const saved=await db.storage.from('atc-photos').upload(path,blob,{contentType:'image/jpeg',upsert:false});
-    if(saved.error)throw Error('Storage upload: '+saved.error.message);
+    if(saved.error)throw Error('Storage upload: '+saved.error.message+(/row-level security/i.test(saved.error.message)?' — run the V37 Storage SQL fix in Supabase.':''));
     storedPath=path;
     const record={id,owner_id:u.id,kind,target_id:target,object_path:path,caption:el(captionId).value.trim(),is_public:publicId?el(publicId).checked:false};
     const linked=await db.from('atc_photos').insert(record);
