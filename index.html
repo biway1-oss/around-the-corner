@@ -482,10 +482,10 @@ async function loadJobCardPhotos(jobId,card){
     if(error)throw error;
     if(!data?.length){
       const note=document.createElement('small');
-      note.textContent='No linked photos visible for this job. Check atc_photos records and their SELECT policies.';
+      note.textContent='No photo attached to this job.';
       note.className='atc-photo-status'; gallery.append(note);return;
     }
-    for(const photo of data){
+    for(const photo of data.slice(0,card.closest('#atcProviderJobDialog')?undefined:1)){
       const {data:link,error:linkError}=await db.storage.from('atc-photos').createSignedUrl(photo.object_path,3600);
       if(linkError){const warning=document.createElement("small");warning.textContent="Photo access error: "+linkError.message;gallery.append(warning);continue;}
       const img=document.createElement('img');
@@ -493,6 +493,7 @@ async function loadJobCardPhotos(jobId,card){
       img.alt=photo.caption||'Photo attached to job';
       img.loading='lazy';
       img.addEventListener('error',()=>{img.replaceWith(Object.assign(document.createElement('small'),{textContent:'Photo could not be displayed.'}));});
+      img.style.cssText='width:100%;max-height:190px;object-fit:cover;border-radius:10px;display:block';
       gallery.append(img);
     }
   }catch(e){
@@ -560,21 +561,13 @@ async function refresh(){try{const u=await user();msg('Loading jobs…');const [
       details.append(item('strong',j.title),item('p',j.category+' · '+j.area+' · '+j.status),item('p',j.description));
       c.append(details);
       if(target==='liveOpen'){
-        const toggle=btn('View job details & photos',()=>{
-          const expanded=details.hidden;
-          details.hidden=!expanded;
-          toggle.textContent=expanded?'Hide job details':'View job details & photos';
-        });
-        c.insertBefore(toggle,details);
-        details.hidden=true;
         c.style.cursor='pointer';
         c.setAttribute('role','button');
         c.setAttribute('tabindex','0');
-        c.setAttribute('aria-label','Open job details for '+j.title);
+        c.setAttribute('aria-label','Open job details and quote options for '+j.title);
         const openCard=()=>{const ownQuote=quotes.find(q=>q.job_id===j.id&&q.provider_id===u.id);openProviderJob(j,ownQuote)};
         c.addEventListener('click',e=>{if(e.target.closest('button,a,input,textarea,select'))return;openCard()});
         c.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target===c){e.preventDefault();openCard()}});
-        toggle.onclick=openCard;
       }if(j.dimensions)c.append(item('p','Details: '+j.dimensions));loadJobCardPhotos(j.id,details);if(target==='liveOpen'){const own=quotes.find(q=>q.job_id===j.id&&q.provider_id===u.id);c.append(own?item('p','Your quote: '+money(own.labour)+' labour + '+money(own.materials)+' materials · '+own.status):btn('Review & send quote',()=>openProviderJob(j,null)))}else{const qs=quotes.filter(q=>q.job_id===j.id);c.append(item('p',qs.length+' quote(s)'));for(const q of qs){const p=document.createElement('div');p.style.borderTop='1px solid #ddd';p.style.padding='8px 0';p.append(item('p',money(q.labour)+' labour + '+money(q.materials)+' materials · '+q.status));if(q.notes)p.append(item('p',q.notes));if(j.status==='open'&&q.status==='pending')p.append(btn('Accept quote',()=>accept(j,q)));c.append(p)}}el(target).append(c)}document.dispatchEvent(new Event('atc-jobs-refreshed'));msg('Online jobs updated.')}catch(e){msg('Could not load online jobs: '+e.message)}}
 // V30: publish directly from the customer job form, rather than a second section.
 const jobForm=el('jobForm');
