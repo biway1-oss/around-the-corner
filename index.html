@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>Around the Corner V40 | Local help. Close to home.</title>
+<title>Around the Corner V41 | Local help. Close to home.</title>
 <style>
 :root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#18322d;background:#f6faf7}*{box-sizing:border-box}body{margin:0}header{background:white;border-bottom:1px solid #e0e9e4;padding:18px max(20px,calc((100vw - 1100px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.logo{font-weight:850;font-size:23px;color:#16684d}nav a{color:#275647;text-decoration:none;margin-left:15px;font-weight:600}.hero{background:linear-gradient(130deg,#0e6049,#21886c);color:white;padding:75px 20px;text-align:center}.hero h1{font-size:clamp(34px,6vw,56px);margin:0 0 14px}.hero p{font-size:19px;max-width:620px;margin:0 auto 24px}.btn{border:0;border-radius:9px;padding:13px 19px;background:#f3b948;color:#18322d;font-weight:800;cursor:pointer;display:inline-block;text-decoration:none}.btn.secondary{background:#e3f2e9}.container{max-width:1100px;margin:auto;padding:42px 20px}h2{font-size:29px;margin:0 0 10px}.muted{color:#597168}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:15px;margin-top:24px}.tile,.panel{background:white;border:1px solid #dce9e2;border-radius:15px;padding:22px;box-shadow:0 3px 12px #153d2810}.tile{font-size:18px;font-weight:700}.tile span{display:block;font-size:30px;margin-bottom:10px}.panel{max-width:720px;margin:25px auto}label{display:block;font-weight:700;margin:16px 0 6px}input,select,textarea{width:100%;border:1px solid #bbd0c5;border-radius:8px;padding:12px;font:inherit}textarea{min-height:100px}footer{background:#173c31;color:white;text-align:center;padding:30px 15px;margin-top:30px}.notice{background:#fff6d9;border:1px solid #f0d18a;padding:13px;border-radius:9px;margin-top:18px}#result{margin-top:15px;font-weight:700}a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #d79a17;outline-offset:2px}
 /* Stronger Around the Corner masthead */
@@ -410,6 +410,7 @@ $('atcClearAppointments').addEventListener('click',()=>{appointments.length=0;st
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const db=createClient('https://tbcbaxvwfdcaspmejgql.supabase.co','sb_publishable_rGTKiec5qEKL5AyvvCjQOA_LFirjIkH');
 const el=id=>document.getElementById(id), msg=t=>el('liveStatus').textContent=t;
+let atcPendingPhotoRetry=null;
 const money=n=>new Intl.NumberFormat('en-CA',{style:'currency',currency:'CAD'}).format(Number(n));
 function item(tag,txt){const e=document.createElement(tag);e.textContent=txt;return e}
 function btn(label,cb){const b=item('button',label);b.className='btn secondary';b.type='button';b.style.margin='5px';b.onclick=cb;return b}
@@ -450,8 +451,44 @@ async function prepareJobPhoto(file){
     return blob;
   } finally {release();}
 }
+async function atcUploadJobPhotos(jobId,images,u){
+  const failures=[];let uploaded=0;
+  for(let i=0;i<images.length;i++){
+    msg(`Uploading photo ${i+1} of ${images.length}…`);
+    const id=crypto.randomUUID(),path=`${u.id}/${id}.jpg`;
+    try{
+      const saved=await db.storage.from('atc-photos').upload(path,images[i],{contentType:'image/jpeg',upsert:false});
+      if(saved.error)throw Error('Storage: '+saved.error.message);
+      const linked=await db.from('atc_photos').insert({id,owner_id:u.id,kind:'job',target_id:jobId,object_path:path,caption:'',is_public:false});
+      if(linked.error){await db.storage.from('atc-photos').remove([path]);throw Error('Database photo link: '+linked.error.message);}
+      uploaded++;
+    }catch(e){failures.push({image:images[i],index:i+1,error:e.message||String(e)});}
+  }
+  return {uploaded,failures};
+}
+function atcShowPhotoResult(message,retry){
+  const status=el('result');status.textContent=message;status.style.whiteSpace='pre-wrap';
+  el('liveStatus').textContent=message;
+  document.getElementById('atcRetryJobPhotos')?.remove();
+  if(retry?.images?.length){
+    const b=document.createElement('button');b.id='atcRetryJobPhotos';b.type='button';b.className='btn secondary';b.textContent='Retry failed photos (do not create another job)';
+    b.style.marginTop='12px';status.after(b);
+    b.onclick=async()=>{
+      b.disabled=true;status.textContent='Retrying photos on existing job…';
+      try{
+        const u=await user();if(u.id!==retry.ownerId)throw Error('Sign in to the original customer account.');
+        const r=await atcUploadJobPhotos(retry.jobId,retry.images,u);
+        const next=r.failures.map(f=>f.image);
+        atcPendingPhotoRetry=next.length?{...retry,images:next}:null;
+        const detail=r.failures.map(f=>`Photo ${f.index}: ${f.error}`).join('\n');
+        atcShowPhotoResult(next.length?`Job ${retry.jobId} saved. ${r.uploaded} photo(s) uploaded on retry; ${next.length} still failed.\n${detail}`:`Success! ${r.uploaded} photo(s) attached to existing job ${retry.jobId}.`,atcPendingPhotoRetry);
+        await refresh();
+      }catch(e){atcShowPhotoResult('Photo retry failed: '+e.message,retry);}
+    };
+  }
+}
 async function publish(){
-  const button=el('livePublish');if(button.disabled)return;
+  const button=el('v30PublishButton');if(button.disabled)return;
   button.disabled=true;
   try{
     const u=await user();
@@ -459,28 +496,21 @@ async function publish(){
     if(!title||!description||!category||!area)throw Error('Fill in the job title, category, description and town above first.');
     const files=Array.from(el('jobPhotos').files);
     if(files.length>6)throw Error('Choose no more than six photos.');
-    // Validate and resize before creating the job, to avoid avoidable partial uploads.
     msg(files.length?'Preparing photos…':'Publishing job…');
     const images=[];for(const file of files)images.push(await prepareJobPhoto(file));
     const {data:job,error}=await db.from('atc_jobs').insert({customer_id:u.id,title,description,category,area,dimensions:el('dimensions').value.trim()}).select('id').single();
     if(error)throw error;
-    let uploaded=0;const failures=[];
-    for(let i=0;i<images.length;i++){
-      msg(`Job published. Uploading photo ${i+1} of ${images.length}…`);
-      const id=crypto.randomUUID(),path=`${u.id}/${id}.jpg`;
-      try{
-        const result=await db.storage.from('atc-photos').upload(path,images[i],{contentType:'image/jpeg',upsert:false});
-        if(result.error)throw result.error;
-        const record=await db.from('atc_photos').insert({id,owner_id:u.id,kind:'job',target_id:job.id,object_path:path,caption:'',is_public:false});
-        if(record.error){await db.storage.from('atc-photos').remove([path]);throw record.error;}
-        uploaded++;
-      }catch(e){failures.push(`Photo ${i+1}: ${e.message}${/row-level security/i.test(e.message)?' (Supabase Storage policy: run the V37 SQL fix)':''}`);}
-    }
-    msg(failures.length?`Job published, but ${failures.length} photo(s) failed: ${failures.join('; ')}. Retry them in Job Photos using job ID ${job.id}.`:`Job published successfully${uploaded?` with ${uploaded} photo(s)`:''}. Job ID: ${job.id}`);
+    const r=await atcUploadJobPhotos(job.id,images,u);
+    atcPendingPhotoRetry=r.failures.length?{jobId:job.id,ownerId:u.id,images:r.failures.map(f=>f.image)}:null;
+    const errors=r.failures.map(f=>`Photo ${f.index}: ${f.error}`).join('\n');
+    const message=r.failures.length?`Job saved (ID: ${job.id}). ${r.uploaded} photo(s) uploaded; ${r.failures.length} failed.\n${errors}`:`Job published successfully with ${r.uploaded} photo(s). Job ID: ${job.id}`;
     el('v13JobId').value=job.id;
-    if(!failures.length){el('jobPhotos').value='';el('jobPhotoPreview').replaceChildren();}
-    try{await refresh()}catch(e){msg('Job published, but refreshing jobs failed: '+e.message);}
-  }catch(e){msg('Could not publish: '+e.message)}finally{button.disabled=false;}
+    if(!r.failures.length){el('jobPhotos').value='';el('jobPhotoPreview').replaceChildren();}
+    try{await refresh()}catch(e){/* Keep the upload result visible even if the job list refresh fails. */}
+    atcShowPhotoResult(message,atcPendingPhotoRetry);
+    return message;
+  }catch(e){const message='Could not publish: '+e.message;atcShowPhotoResult(message,null);return message;}
+  finally{button.disabled=false;}
 }
 async function quote(job){try{const u=await user();if(u.id===job.customer_id)throw Error('You cannot quote on your own job.');const labour=prompt('Labour cost in CAD (numbers only)');if(labour===null)return;const materials=prompt('Materials cost in CAD (numbers only)');if(materials===null)return;const a=Number(labour),b=Number(materials);if(!Number.isFinite(a)||!Number.isFinite(b)||a<0||b<0||!String(labour).trim()||!String(materials).trim())throw Error('Enter valid non-negative amounts.');const notes=prompt('Quote notes (optional, max 500 characters)')||'';if(notes.length>500)throw Error('Notes too long.');const {error}=await db.from('atc_quotes').insert({job_id:job.id,provider_id:u.id,labour:a,materials:b,notes});if(error)throw error;msg('Quote sent.');await refresh()}catch(e){msg('Quote not sent: '+e.message)}}
 async function accept(job,q){try{if(!confirm('Accept this quote? Other quotes will be declined.'))return;const {error}=await db.rpc('atc_accept_quote',{p_job_id:job.id,p_quote_id:q.id});if(error)throw error;msg('Quote accepted. Job is now booked.');await refresh()}catch(e){msg('Could not accept quote: '+e.message)}}
@@ -588,12 +618,7 @@ jobForm.addEventListener('submit',event=>{
   event.stopImmediatePropagation();
   const status=el('result');
   status.textContent='Publishing job and photos…';
-  publish().then(()=>{
-    status.textContent=el('liveStatus').textContent;
-    if(status.textContent.startsWith('Job published')){
-      el('liveMarketplace').scrollIntoView({behavior:'smooth',block:'start'});
-    }
-  }).catch(error=>{status.textContent='Could not publish: '+error.message;});
+  publish().catch(error=>{atcShowPhotoResult('Could not publish: '+error.message,null);});
 },true);
 el('livePublish').onclick=publish;el('liveRefresh').onclick=refresh;
 db.auth.onAuthStateChange(()=>{setTimeout(()=>refresh().catch(()=>{}),0)});
